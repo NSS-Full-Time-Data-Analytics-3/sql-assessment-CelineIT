@@ -4,22 +4,44 @@ a. How many poets from each grade are represented in the data?
 b. How many of the poets in each grade are Male and how many are Female? Only return the poets identified as Male or Female.
 c. Do you notice any trends across all grades?*/
 
---a.
+-- a. How many poets from each grade are represented in the data?
+
 SELECT grade_id, COUNT(grade_id) AS number_poets_per_grade
 FROM author
 GROUP BY grade_id
 ORDER BY grade_id;
+-- 1st grade = 623 poets
+-- 2nd grade = 1437 poets
+-- 3rd grade = 2344 poets
+-- 4th grade = 3288 poets
+-- 5th grade = 3464 poets
 
---b.
+-- this is just to make sure my total of poets is correct
+SELECT grade_id, COUNT(grade_id) AS number_poets_per_grade
+FROM author
+GROUP BY CUBE (grade_id)
+ORDER BY grade_id;
+-- total of 11,156 poets
+
+-- b. How many of the poets in each grade are Male and how many are Female? Only return the poets identified as Male or Female.
 SELECT grade_id, COUNT(grade_id) AS number_poets_per_grade, gender.name
 FROM author
 INNER JOIN gender ON gender.id = author.gender_id
 WHERE gender.name = 'Female' OR gender.name = 'Male'
 GROUP BY grade_id, gender.name
 ORDER BY grade_id;
+-- 1st grade 243 F
+-- 1st grade 163 M
+-- 2nd grade 605 F
+-- 2nd grade 412 M
+-- 3rd grade 557 M
+-- 3rd grade 948 F
+-- 4th grade 723 M
+-- 4th grade 1241 F
+-- 5th grade 1294 F
+-- 5th grade 757 M
 
---c.
--- In each grade, there are more Female than Male
+--c. Do you notice any trends across all grades? // In each grade, there are more Female than Male
 
 
 
@@ -48,7 +70,9 @@ SELECT COUNT (*) AS total_number_of_poems,
 	FROM poem
 	WHERE text ILIKE '%death%' OR title ILIKE '%death%')
 FROM poem;
-
+-- 32,842 total number of poems
+-- average character count for poems that mention death 342.85
+-- average character count for poems that mention love 223.40
 
 /*q3
 Do longer poems have more emotional intensity compared to shorter poems?*/
@@ -79,6 +103,12 @@ ORDER BY avg_char_count
 -- Joy
 
 
+/*b. Convert the query you wrote in part a into a CTE. Then find the 5 most intense poems that express joy and whether they are to be longer or shorter than the average joy poem.
+
+What is the most joyful poem about?
+Do you think these are all classified correctly?*/
+
+
 /*q4
 Compare the 5 most angry poems by 1st graders to the 5 most angry poems by 5th graders.
 
@@ -90,23 +120,32 @@ SELECT * FROM grade
 -- id 12345 // name 1st etc...
 SELECT * FROM author
 --id, name of the kid, grade_id, gender_id
+SELECT * FROM gender
 
 SELECT * FROM emotion
 -- id 1234 // name Anger, Fear, Sadness, Joy
 SELECT * FROM poem_emotion
 --id, inten, poem_id, emotion_id 1234
 
-
+SELECT * FROM poem and author on author_id
+--id, title, text, author_id 11156, charcount, poki
+--32842
 
 -- a. Which group writes the angreist poems according to the intensity score?
-SELECT *
-FROM emotion
-INNER JOIN poem_emotion AS pe ON pe.emotion_id = emotion.id
-INNER JOIN
-INNER JOIN author ON author.grade_id = grade.id
-WHERE emotion.name = 'Anger' 
-AND 
+WITH cte_join as (
+			SELECT emotion.name, pe.emotion_id, grade.id as grade_id, grade.name as grade_name
+			FROM emotion
+			INNER JOIN poem_emotion as pe ON pe.emotion_id = emotion.id
+			INNER JOIN poem ON poem.id = pe.poem_id
+			INNER JOIN author ON author.id = poem.author_id
+			INNER JOIN grade ON grade.id = author.grade_id
+			AND emotion.name = 'Anger')
+SELECT grade_name, COUNT(grade_name) as count_angry
+FROM cte_join
+GROUP BY grade_name
+ORDER BY count_angry DESC;
+-- 5th graders write the angriest poems
+			
 
-SELECT *
-FROM grade
 
+	
