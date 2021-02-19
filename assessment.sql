@@ -51,24 +51,32 @@ FROM poem;
 
 
 /*q3
-Do longer poems have more emotional intensity compared to shorter poems?
-a. Start by writing a query to return each emotion in the database with it's average intensity and character count.
+Do longer poems have more emotional intensity compared to shorter poems?*/
 
-Which emotion is associated the longest poems on average?
-Which emotion has the shortest?*/
-
--- not finished
-SELECT *  FROM poem_emotion ORDER BY poem_id
-SELECT *  FROM emotion
-SELECT *  FROM poem 
-
-SELECT emotion.name, count(emotion.name) as count_emotion_name, ROUND(avg(char_count),2), ROUND(avg(intensity_percent),2)
+-- a. Start by writing a query to return each emotion in the database with it's average intensity and character count.
+SELECT emotion.name, count(emotion.name) as count_emotion_name, ROUND(avg(char_count),2) as avg_char_count, ROUND(avg(intensity_percent),2) as avg_intensity_percent
 FROM poem_emotion AS pe
 INNER JOIN emotion ON emotion.id = pe.emotion_id
 INNER JOIN poem ON poem.id = pe.poem_id
 GROUP BY emotion.name
 
+-- Which emotion is associated with the longest poems on average? //Same code adding ORDER BY avg_char_count DESC
+SELECT emotion.name, count(emotion.name) as count_emotion_name, ROUND(avg(char_count),2) as avg_char_count, ROUND(avg(intensity_percent),2) as avg_intensity_percent
+FROM poem_emotion AS pe
+INNER JOIN emotion ON emotion.id = pe.emotion_id
+INNER JOIN poem ON poem.id = pe.poem_id
+GROUP BY emotion.name
+ORDER BY avg_char_count DESC
+-- Anger
 
+-- Which emotion has the shortest? //Same code adding ORDER BY avg_char_count 
+SELECT emotion.name, count(emotion.name) as count_emotion_name, ROUND(avg(char_count),2) as avg_char_count, ROUND(avg(intensity_percent),2) as avg_intensity_percent
+FROM poem_emotion AS pe
+INNER JOIN emotion ON emotion.id = pe.emotion_id
+INNER JOIN poem ON poem.id = pe.poem_id
+GROUP BY emotion.name
+ORDER BY avg_char_count 
+-- Joy
 
 
 /*q4
