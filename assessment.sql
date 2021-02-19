@@ -62,11 +62,12 @@ SELECT *  FROM poem_emotion ORDER BY poem_id
 SELECT *  FROM emotion
 SELECT *  FROM poem 
 
-
-SELECT emotion.id, emotion.name, poem.text, poem.char_count, poem.intensity_percent
+SELECT emotion.name, count(emotion.name) as count_emotion_name, ROUND(avg(char_count),2), ROUND(avg(intensity_percent),2)
 FROM poem_emotion AS pe
 INNER JOIN emotion ON emotion.id = pe.emotion_id
 INNER JOIN poem ON poem.id = pe.poem_id
+GROUP BY emotion.name
+
 
 
 
@@ -79,20 +80,25 @@ c. Which of these do you like the best?*/
 
 SELECT * FROM grade
 -- id 12345 // name 1st etc...
+SELECT * FROM author
+--id, name of the kid, grade_id, gender_id
 
 SELECT * FROM emotion
 -- id 1234 // name Anger, Fear, Sadness, Joy
-
 SELECT * FROM poem_emotion
---emotion_id
-
-SELECT * FROM author
+--id, inten, poem_id, emotion_id 1234
 
 
+
+-- a. Which group writes the angreist poems according to the intensity score?
 SELECT *
 FROM emotion
 INNER JOIN poem_emotion AS pe ON pe.emotion_id = emotion.id
-INNER JOIN author ON grade_id = grade.id
+INNER JOIN
+INNER JOIN author ON author.grade_id = grade.id
 WHERE emotion.name = 'Anger' 
 AND 
+
+SELECT *
+FROM grade
 
