@@ -211,19 +211,34 @@ a. Examine the poets in the database with the name emily.
 Create a report showing the count of emilys by grade along with the distribution of emotions that characterize their work.
 b. Export this report to Excel and create a visualization that shows what you have found.*/
 
-SELECT name, grade_id, COUNT(name) as count_emily
+SELECT name, id, grade_id, COUNT(name) as count_emily
 FROM author
 WHERE name = 'emily'
-GROUP BY name, grade_id
+GROUP BY name, id, grade_id
 -- There are 5 Emilys, one in each grade.
-
-SELECT author.name as author_name, author.grade_id,emotion.name as emotion_name
-FROM author
-LEFT JOIN emotion ON emotion.id = author.id
--- INNER JOIN poem ON poem.author_id = author.id
--- INNER JOIN poem_emotion as pe ON pe.poem_id = poem.id 
--- INNER JOIN emotion ON emotion.id = pe.emotion_id
-WHERE author.name = 'emily'
 
 -- a. Examine the poets in the database with the name emily. 
 -- Create a report showing the count of emilys by grade along with the distribution of emotions that characterize their work.
+
+WITH emily_name AS (
+	SELECT name, id, grade_id, COUNT(name)
+	FROM author
+	WHERE name = 'emily'
+	GROUP BY name, id, grade_id
+	)
+SELECT  COUNT(DISTINCT author.name) as count_emily, author.grade_id,
+COUNT(CASE WHEN emotion.name = 'Anger' THEN 1 END) as count_anger,
+COUNT (CASE WHEN emotion.name = 'Fear' THEN 1 END) as count_fear,
+COUNT (CASE WHEN emotion.name = 'Joy' THEN 1 END) as count_joy,
+COUNT (CASE WHEN emotion.name = 'Sadness' THEN 1 END) as count_sadness
+			FROM emily_name
+INNER JOIN emotion ON emotion.id = emily_name.grade_id
+INNER JOIN poem_emotion as pe ON pe.emotion_id = emotion.id
+INNER JOIN poem ON poem.id = pe.poem_id
+INNER JOIN author ON author.id = poem.author_id
+WHERE author.name = 'emily'
+GROUP BY author.grade_id;
+
+
+-- b. Export this report to Excel and create a visualization that shows what you have found.*/
+-- go to excel file
