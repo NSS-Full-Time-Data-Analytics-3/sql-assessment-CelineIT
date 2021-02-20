@@ -144,8 +144,8 @@ SELECT grade_name, COUNT(grade_name) as count_angry
 FROM cte_join
 GROUP BY grade_name
 ORDER BY count_angry DESC;
--- 5th graders write the angriest poems
-			
+-- 5th graders write the angriest poems with 4,316 poems
+
 
 
 	
