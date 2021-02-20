@@ -74,6 +74,12 @@ FROM poem;
 -- average character count for poems that mention death 342.85
 -- average character count for poems that mention love 223.40
 
+
+
+
+
+
+
 /*q3
 Do longer poems have more emotional intensity compared to shorter poems?*/
 
@@ -103,10 +109,35 @@ ORDER BY avg_char_count
 -- Joy
 
 
-/*b. Convert the query you wrote in part a into a CTE. Then find the 5 most intense poems that express joy and whether they are to be longer or shorter than the average joy poem.
+/*b. Convert the query you wrote in part a into a CTE. 
+Then find the 5 most intense poems that express joy and whether they are to be longer or shorter than the average joy poem.*/
 
-What is the most joyful poem about?
-Do you think these are all classified correctly?*/
+WITH cte as (
+	SELECT emotion.name, count(emotion.name) as count_emotion_name, ROUND(avg(char_count),2) as avg_char_count, ROUND(avg(intensity_percent),2) as avg_intensity_percent, poem.text
+	FROM poem_emotion AS pe
+	INNER JOIN emotion ON emotion.id = pe.emotion_id
+	INNER JOIN poem ON poem.id = pe.poem_id
+	WHERE emotion.name ='Joy'
+	GROUP BY emotion.name, poem.text
+	)
+SELECT *
+FROM cte
+WHERE avg_char_count > (SELECT AVG(avg_char_count) FROM cte)
+ORDER BY avg_intensity_percent DESC
+LIMIT 5;
+
+--What is the most joyful poem about? 
+-- //Butterflies
+
+-- Do you think these are all classified correctly?
+-- // no, some poems are not very joyfull
+
+
+
+
+
+
+
 
 
 /*q4
@@ -116,21 +147,6 @@ a. Which group writes the angreist poems according to the intensity score?
 b. Who shows up more in the top five for grades 1 and 5, males or females?
 c. Which of these do you like the best?*/
 
-SELECT * FROM grade
--- id 12345 // name 1st etc...
-SELECT * FROM author
---id, name of the kid, grade_id, gender_id
-SELECT * FROM gender
-
-SELECT * FROM emotion
--- id 1234 // name Anger, Fear, Sadness, Joy
-SELECT * FROM poem_emotion
---id, inten, poem_id, emotion_id 1234
-
-SELECT * FROM poem and author on author_id
---id, title, text, author_id 11156, charcount, poki
---32842
-
 -- a. Which group writes the angreist poems according to the intensity score?
 WITH cte_join as (
 			SELECT emotion.name, pe.emotion_id, grade.id as grade_id, grade.name as grade_name
@@ -139,13 +155,75 @@ WITH cte_join as (
 			INNER JOIN poem ON poem.id = pe.poem_id
 			INNER JOIN author ON author.id = poem.author_id
 			INNER JOIN grade ON grade.id = author.grade_id
-			AND emotion.name = 'Anger')
+			WHERE emotion.name = 'Anger')
 SELECT grade_name, COUNT(grade_name) as count_angry
 FROM cte_join
 GROUP BY grade_name
 ORDER BY count_angry DESC;
 -- 5th graders write the angriest poems with 4,316 poems
 
+-- b. Who shows up more in the top five for grades 1 and 5, males or females?
+WITH cte_join as (
+			SELECT emotion.name as emotion_name, grade.id as grade_id, gender.name as gender_name
+			FROM emotion
+			INNER JOIN poem_emotion as pe ON pe.emotion_id = emotion.id
+			INNER JOIN poem ON poem.id = pe.poem_id
+			INNER JOIN author ON author.id = poem.author_id
+			INNER JOIN grade ON grade.id = author.grade_id
+			INNER JOIN gender ON gender.id = author.gender_id
+			WHERE emotion.name = 'Anger')
+SELECT emotion_name, grade_id, gender_name, count(gender_name) as gender_name_count
+FROM cte_join
+WHERE gender_name = 'Female' OR gender_name = 'Male'
+AND grade_id = '1' OR grade_id = '5'
+GROUP BY  emotion_name, grade_id, gender_name
+ORDER BY gender_name_count
+
+-- I can't get it to work...
+WITH cte_join as (
+			SELECT emotion.name as emotion_name, grade.id as grade_id
+			FROM emotion
+			INNER JOIN poem_emotion as pe ON pe.emotion_id = emotion.id
+			INNER JOIN poem ON poem.id = pe.poem_id
+			INNER JOIN author ON author.id = poem.author_id
+			INNER JOIN grade ON grade.id = author.grade_id
+			WHERE emotion.name = 'Anger')
+SELECT *
+FROM cte_join
+INNER JOIN gender ON gender.id = author.gender_id
+WHERE gender.name = 'Female' OR gender.name = 'Male'
+AND grade_id = '1' OR grade_id = '5'
+GROUP BY  emotion_name, grade_id, gender_name
+ORDER BY gender_name_count
+--- not working
 
 
-	
+
+
+/*5.
+Emily Dickinson was a famous American poet, who wrote many poems in the 1800s, including one about a caterpillar that begins:
+
+ > A fuzzy fellow, without feet,
+ > Yet doth exceeding run!
+ > Of velvet, is his Countenance,
+ > And his Complexion, dun!
+a. Examine the poets in the database with the name emily. 
+Create a report showing the count of emilys by grade along with the distribution of emotions that characterize their work.
+b. Export this report to Excel and create a visualization that shows what you have found.*/
+
+SELECT name, grade_id, COUNT(name) as count_emily
+FROM author
+WHERE name = 'emily'
+GROUP BY name, grade_id
+-- There are 5 Emilys, one in each grade.
+
+SELECT author.name as author_name, author.grade_id,emotion.name as emotion_name
+FROM author
+LEFT JOIN emotion ON emotion.id = author.id
+-- INNER JOIN poem ON poem.author_id = author.id
+-- INNER JOIN poem_emotion as pe ON pe.poem_id = poem.id 
+-- INNER JOIN emotion ON emotion.id = pe.emotion_id
+WHERE author.name = 'emily'
+
+-- a. Examine the poets in the database with the name emily. 
+-- Create a report showing the count of emilys by grade along with the distribution of emotions that characterize their work.
